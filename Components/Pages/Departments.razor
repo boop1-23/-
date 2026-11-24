@@ -1,0 +1,65 @@
+@page "/departments"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+@inject ApplicationDbContext Db
+@using HospitalManagement.Data
+@using Microsoft.EntityFrameworkCore
+
+<PageTitle>الأقسام</PageTitle>
+<h1>إدارة الأقسام</h1>
+
+<EditForm Model="model" OnValidSubmit="AddDepartment" FormName="DepartmentForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    <label>رمز القسم
+        <InputText @bind-Value="model.Code" required />
+    </label>
+    <label>اسم القسم بالعربية
+        <InputText @bind-Value="model.NameAr" required />
+    </label>
+    <label>الاسم بالإنجليزية
+        <InputText @bind-Value="model.NameEn" />
+    </label>
+    <button type="submit">إضافة قسم</button>
+</EditForm>
+
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status">@status</p>
+}
+
+<table>
+    <thead><tr><th>الرمز</th><th>القسم بالعربية</th><th>القسم بالإنجليزية</th><th>الحالة</th></tr></thead>
+    <tbody>
+    @foreach (var department in departments)
+    {
+        <tr><td>@department.Code</td><td>@department.NameAr</td><td>@department.NameEn</td><td>@(department.IsActive ? "نشط" : "متوقف")</td></tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    private readonly Department model = new();
+    private List<Department> departments = [];
+    private string status = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+        => departments = await Db.Departments.OrderBy(x => x.NameAr).ToListAsync();
+
+    private async Task AddDepartment()
+    {
+        if (await Db.Departments.AnyAsync(x => x.Code == model.Code.Trim()))
+        {
+            status = "رمز القسم موجود بالفعل.";
+            return;
+        }
+
+        model.Code = model.Code.Trim().ToUpperInvariant();
+        model.NameAr = model.NameAr.Trim();
+        model.NameEn = model.NameEn.Trim();
+        Db.Departments.Add(model);
+        await Db.SaveChangesAsync();
+        status = "تمت إضافة القسم بنجاح.";
+        departments = await Db.Departments.OrderBy(x => x.NameAr).ToListAsync();
+    }
+}

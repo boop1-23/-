@@ -1,0 +1,14 @@
+# Ignore build outputs
+[Bb]in/
+[Oo]bj/
+.vs/
+.vscode/
+*.user
+*.suo
+*.log
+
+# Local secrets
+appsettings.Development.json
+.env
+*.pfx
+*.pem

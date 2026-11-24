@@ -1,0 +1,14 @@
+@page "/Account/Login"
+
+<PageTitle>تسجيل الدخول</PageTitle>
+<h1>تسجيل الدخول</h1>
+
+<form method="post" action="/Account/Login">
+    <label>البريد الإلكتروني
+        <input name="email" type="email" autocomplete="username" required />
+    </label>
+    <label>كلمة المرور
+        <input name="password" type="password" autocomplete="current-password" required />
+    </label>
+    <button type="submit">دخول</button>
+</form>

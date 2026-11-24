@@ -1,0 +1,19 @@
+:root { font-family: "Segoe UI", Tahoma, sans-serif; color: #183028; background: #f4f7f6; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.app-shell { min-height: 100vh; display: grid; grid-template-columns: 220px 1fr; }
+.app-shell aside { background: #183028; color: white; padding: 24px; }
+.app-shell aside nav { display: grid; gap: 10px; margin: 24px 0; }
+.app-shell aside a { color: white; text-decoration: none; }
+.app-shell main { padding: 32px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.cards section { background: white; border: 1px solid #dce5e1; border-radius: 10px; padding: 20px; }
+.cards span { display: block; margin-top: 8px; color: #60756d; }
+form { display: grid; gap: 12px; max-width: 520px; margin-bottom: 24px; }
+label { display: grid; gap: 6px; }
+input { border: 1px solid #bac9c3; border-radius: 6px; padding: 10px; }
+button { border: 0; border-radius: 6px; background: #28785a; color: white; cursor: pointer; padding: 10px 16px; }
+table { width: 100%; border-collapse: collapse; background: white; }
+th, td { border: 1px solid #dce5e1; padding: 10px; text-align: right; }
+.status { color: #28785a; font-weight: bold; }
+@media (max-width: 720px) { .app-shell { grid-template-columns: 1fr; } }

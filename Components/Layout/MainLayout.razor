@@ -1,0 +1,25 @@
+@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <aside>
+        <h2>نظام المستشفى</h2>
+        <nav>
+            <a href="/">الرئيسية</a>
+            <AuthorizeView Roles="Administrator">
+                <Authorized>
+                    <a href="/departments">الأقسام</a>
+                </Authorized>
+            </AuthorizeView>
+        </nav>
+        <AuthorizeView>
+            <Authorized>
+                <form method="post" action="/Account/Logout">
+                    <button type="submit">تسجيل الخروج</button>
+                </form>
+            </Authorized>
+        </AuthorizeView>
+    </aside>
+    <main>
+        @Body
+    </main>
+</div>
