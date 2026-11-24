@@ -1,7 +1,12 @@
 @page "/Account/Login"
-
 <PageTitle>تسجيل الدخول</PageTitle>
+
 <h1>تسجيل الدخول</h1>
+
+@if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(Navigation.Uri).TryGetValue("error", out var error))
+{
+    <p class="status">اسم المستخدم أو كلمة المرور غير صحيحة، أو الحساب مقفل مؤقتاً.</p>
+}
 
 <form method="post" action="/Account/Login">
     <label>البريد الإلكتروني
@@ -12,3 +17,7 @@
     </label>
     <button type="submit">دخول</button>
 </form>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+}

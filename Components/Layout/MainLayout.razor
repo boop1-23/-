@@ -8,12 +8,14 @@
             <AuthorizeView Roles="Administrator">
                 <Authorized>
                     <a href="/departments">الأقسام</a>
+                    <a href="/employees">الموظفون والعقود</a>
                 </Authorized>
             </AuthorizeView>
         </nav>
         <AuthorizeView>
             <Authorized>
                 <form method="post" action="/Account/Logout">
+                    @* AspNet Core antiforgery validates this form through endpoint middleware. *@
                     <button type="submit">تسجيل الخروج</button>
                 </form>
             </Authorized>

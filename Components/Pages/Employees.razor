@@ -1,0 +1,153 @@
+@page "/employees"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>الموظفون والعقود</PageTitle>
+<h1>الموظفون والعقود</h1>
+
+<EditForm Model="employee" OnValidSubmit="AddEmployee" FormName="EmployeeForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label>الرقم الوظيفي
+        <InputText @bind-Value="employee.EmployeeNumber" />
+    </label>
+    <label>اسم الموظف
+        <InputText @bind-Value="employee.FullName" />
+    </label>
+    <label>القسم
+        <InputSelect @bind-Value="employee.DepartmentId">
+            <option value="">اختر القسم</option>
+            @foreach (var department in departments)
+            {
+                <option value="@department.Id">@department.NameAr</option>
+            }
+        </InputSelect>
+    </label>
+    <label>الرقم الوطني
+        <InputText @bind-Value="employee.NationalId" />
+    </label>
+    <label>رقم الهاتف
+        <InputText @bind-Value="employee.PhoneNumber" />
+    </label>
+
+    <h2>العقد</h2>
+    <label>نوع العقد
+        <InputSelect @bind-Value="contractType">
+            <option value="@ContractType.Permanent">دائم</option>
+            <option value="@ContractType.FixedTerm">محدد المدة</option>
+            <option value="@ContractType.Daily">يومي</option>
+            <option value="@ContractType.Hourly">بالساعة</option>
+        </InputSelect>
+    </label>
+    <label>تاريخ البدء
+        <InputDate @bind-Value="startDate" />
+    </label>
+    <label>تاريخ الانتهاء
+        <InputDate @bind-Value="endDate" />
+    </label>
+    <label>الأجر
+        <InputNumber @bind-Value="salary" />
+    </label>
+    <label>وحدة الأجر
+        <InputSelect @bind-Value="salaryUnit">
+            <option>شهري</option>
+            <option>يومي</option>
+            <option>بالساعة</option>
+        </InputSelect>
+    </label>
+
+    <button type="submit">حفظ الموظف والعقد</button>
+</EditForm>
+
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status">@status</p>
+}
+
+<table>
+    <thead><tr><th>الرقم الوظيفي</th><th>الموظف</th><th>القسم</th><th>الحالة</th></tr></thead>
+    <tbody>
+    @foreach (var item in employees)
+    {
+        <tr>
+            <td>@item.EmployeeNumber</td>
+            <td>@item.FullName</td>
+            <td>@item.Department?.NameAr</td>
+            <td>@(item.IsActive ? "نشط" : "موقوف")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    [SupplyParameterFromForm] private Employee employee { get; set; } = new();
+
+    [Inject] private ApplicationDbContext Db { get; set; } = default!;
+
+    private List<Department> departments = [];
+    private List<Employee> employees = [];
+    private string status = string.Empty;
+    private ContractType contractType = ContractType.Permanent;
+    private DateOnly startDate = DateOnly.FromDateTime(DateTime.Today);
+    private DateOnly? endDate;
+    private decimal salary;
+    private string salaryUnit = "شهري";
+
+    protected override async Task OnInitializedAsync()
+    {
+        departments = await Db.Departments.Where(x => x.IsActive).OrderBy(x => x.NameAr).ToListAsync();
+        employees = await Db.Employees.Include(x => x.Department).OrderBy(x => x.FullName).ToListAsync();
+    }
+
+    private async Task AddEmployee()
+    {
+        employee.EmployeeNumber = employee.EmployeeNumber.Trim();
+        employee.FullName = employee.FullName.Trim();
+
+        if (string.IsNullOrWhiteSpace(employee.EmployeeNumber) ||
+            string.IsNullOrWhiteSpace(employee.FullName) ||
+            employee.DepartmentId == Guid.Empty)
+        {
+            status = "يرجى إدخال بيانات الموظف والقسم والأجر.";
+            return;
+        }
+
+        if (await Db.Employees.AnyAsync(x => x.EmployeeNumber == employee.EmployeeNumber))
+        {
+            status = "الرقم الوظيفي موجود بالفعل.";
+            return;
+        }
+
+        if (contractType != ContractType.Permanent && endDate is null)
+        {
+            status = "العقود غير الدائمة تحتاج إلى تاريخ انتهاء.";
+            return;
+        }
+
+        if (salary < 0)
+        {
+            status = "الأجر لا يمكن أن يكون سالباً.";
+            return;
+        }
+
+        Db.Employees.Add(employee);
+        Db.EmploymentContracts.Add(new EmploymentContract
+        {
+            Employee = employee,
+            Type = contractType,
+            StartDate = startDate,
+            EndDate = endDate,
+            SalaryAmount = salary,
+            SalaryUnit = salaryUnit
+        });
+
+        await Db.SaveChangesAsync();
+        status = "تم حفظ الموظف وعقده بنجاح.";
+
+        employee = new Employee();
+        salary = 0;
+        endDate = null;
+        employees = await Db.Employees.Include(x => x.Department).OrderBy(x => x.FullName).ToListAsync();
+    }
+}
