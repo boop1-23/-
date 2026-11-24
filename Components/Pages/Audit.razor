@@ -1,0 +1,25 @@
+@using Microsoft.AspNetCore.Authorization
+@page "/audit"
+@attribute [Authorize(Roles = "Administrator")]
+@rendermode InteractiveServer
+
+<PageTitle>سجل التدقيق</PageTitle>
+<h1>سجل التدقيق</h1>
+
+<table>
+    <thead><tr><th>التوقيت</th><th>المستخدم</th><th>الإجراء</th><th>الكيان</th><th>المعرّف</th></tr></thead>
+    <tbody>
+    @foreach (var item in logs)
+    {
+        <tr><td>@item.CreatedAt.LocalDateTime</td><td>@item.UserName</td><td>@item.Action</td><td>@item.Entity</td><td>@item.EntityId</td></tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    [Inject] private ApplicationDbContext Db { get; set; } = default!;
+    private List<AuditLog> logs = [];
+
+    protected override async Task OnInitializedAsync()
+        => logs = await Db.AuditLogs.OrderByDescending(x => x.CreatedAt).Take(500).ToListAsync();
+}

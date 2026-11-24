@@ -5,23 +5,23 @@
         <h2>نظام المستشفى</h2>
         <nav>
             <a href="/">الرئيسية</a>
+            <a href="/patients">المرضى</a>
             <AuthorizeView Roles="Administrator">
                 <Authorized>
                     <a href="/departments">الأقسام</a>
                     <a href="/employees">الموظفون والعقود</a>
+                    <a href="/audit">سجل التدقيق</a>
                 </Authorized>
             </AuthorizeView>
         </nav>
         <AuthorizeView>
             <Authorized>
                 <form method="post" action="/Account/Logout">
-                    @* AspNet Core antiforgery validates this form through endpoint middleware. *@
+                    <AntiforgeryToken />
                     <button type="submit">تسجيل الخروج</button>
                 </form>
             </Authorized>
         </AuthorizeView>
     </aside>
-    <main>
-        @Body
-    </main>
+    <main>@Body</main>
 </div>

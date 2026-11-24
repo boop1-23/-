@@ -1,0 +1,81 @@
+@page "/patients"
+@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>المرضى</PageTitle>
+<h1>تسجيل المرضى</h1>
+
+<EditForm Model="patient" OnValidSubmit="AddPatient" FormName="PatientForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <label>رقم الملف الطبي
+        <InputText @bind-Value="patient.MedicalRecordNumber" />
+    </label>
+    <label>اسم المريض
+        <InputText @bind-Value="patient.FullName" />
+    </label>
+    <label>تاريخ الميلاد
+        <InputDate @bind-Value="dateOfBirth" />
+    </label>
+    <label>الرقم الوطني
+        <InputText @bind-Value="patient.NationalId" />
+    </label>
+    <label>رقم الهاتف
+        <InputText @bind-Value="patient.PhoneNumber" />
+    </label>
+    <button type="submit">حفظ المريض</button>
+</EditForm>
+
+@if (!string.IsNullOrWhiteSpace(status))
+{
+    <p class="status">@status</p>
+}
+
+<table>
+    <thead><tr><th>رقم الملف</th><th>الاسم</th><th>الهاتف</th><th>الحالة</th></tr></thead>
+    <tbody>
+    @foreach (var item in patients)
+    {
+        <tr><td>@item.MedicalRecordNumber</td><td>@item.FullName</td><td>@item.PhoneNumber</td><td>@(item.IsActive ? "نشط" : "مؤرشف")</td></tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    [Inject] private ApplicationDbContext Db { get; set; } = default!;
+    [SupplyParameterFromForm] private Patient patient { get; set; } = new();
+    private DateOnly? dateOfBirth;
+    private List<Patient> patients = [];
+    private string status = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+        => patients = await Db.Patients.OrderByDescending(x => x.CreatedAt).Take(100).ToListAsync();
+
+    private async Task AddPatient()
+    {
+        patient.MedicalRecordNumber = patient.MedicalRecordNumber.Trim();
+        patient.FullName = patient.FullName.Trim();
+
+        if (string.IsNullOrWhiteSpace(patient.MedicalRecordNumber) || string.IsNullOrWhiteSpace(patient.FullName))
+        {
+            status = "يرجى إدخال رقم الملف واسم المريض.";
+            return;
+        }
+
+        if (await Db.Patients.AnyAsync(x => x.MedicalRecordNumber == patient.MedicalRecordNumber))
+        {
+            status = "رقم الملف مستخدم بالفعل.";
+            return;
+        }
+
+        patient.DateOfBirth = dateOfBirth;
+        Db.Patients.Add(patient);
+        await Db.SaveChangesAsync();
+
+        status = "تم تسجيل المريض بنجاح.";
+        patient = new Patient();
+        dateOfBirth = null;
+        patients = await Db.Patients.OrderByDescending(x => x.CreatedAt).Take(100).ToListAsync();
+    }
+}

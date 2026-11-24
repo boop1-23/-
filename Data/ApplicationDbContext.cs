@@ -10,6 +10,8 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
     public DbSet<Department> Departments => Set<Department>();
     public DbSet<Employee> Employees => Set<Employee>();
     public DbSet<EmploymentContract> EmploymentContracts => Set<EmploymentContract>();
+    public DbSet<Patient> Patients => Set<Patient>();
+    public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -48,6 +50,24 @@ public sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> 
                 .WithMany()
                 .HasForeignKey(x => x.EmployeeId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Patient>(entity =>
+        {
+            entity.HasIndex(x => x.MedicalRecordNumber).IsUnique();
+            entity.Property(x => x.MedicalRecordNumber).HasMaxLength(32);
+            entity.Property(x => x.FullName).HasMaxLength(200);
+            entity.Property(x => x.NationalId).HasMaxLength(32);
+        });
+
+        builder.Entity<AuditLog>(entity =>
+        {
+            entity.Property(x => x.UserId).HasMaxLength(450);
+            entity.Property(x => x.UserName).HasMaxLength(256);
+            entity.Property(x => x.Action).HasMaxLength(64);
+            entity.Property(x => x.Entity).HasMaxLength(64);
+            entity.Property(x => x.EntityId).HasMaxLength(64);
+            entity.HasIndex(x => x.CreatedAt);
         });
     }
 }

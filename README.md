@@ -1,40 +1,35 @@
 # Hospital Management System
 
-نظام إدارة مستشفى داخلي مبني بـ ASP.NET Core 10 وBlazor Server وPostgreSQL.
+نظام إدارة مستشفى داخلي باستخدام ASP.NET Core 10 وBlazor Server وPostgreSQL.
 
-## البداية
+## تشغيل سريع محلي
 
-1. ثبّت .NET 10 SDK وPostgreSQL.
-2. عيّن إعدادات قاعدة البيانات ومستخدم المدير في متغيرات البيئة:
-
-```bash
-ConnectionStrings__DefaultConnection="Host=localhost;Database=hospital;Username=hospital_app;Password=change-me"
-SeedAdmin__Email="admin@hospital.local"
-SeedAdmin__Password="Strong-Password-Here!123"
-ASPNETCORE_URLS="http://0.0.0.0:8080"
-```
-
-3. شغّل:
+المتطلبات: Docker Desktop و.NET 10 SDK.
 
 ```bash
+docker compose up -d postgres
+export ConnectionStrings__DefaultConnection='Host=localhost;Database=hospital;Username=hospital_app;Password=change-this-local-password'
+export SeedAdmin__Email='admin@hospital.local'
+export SeedAdmin__Password='Change-Me-Strong!123'
 dotnet run
 ```
 
-4. افتح الرابط المحلي المعروض، وسجّل الدخول بحساب المدير الذي عيّنته.
+على PowerShell استخدم:
 
-> لا تستخدم بيانات مرضى حقيقية أثناء التطوير. هذا المشروع يحتاج مراجعة امتثال وحماية بيانات قبل التشغيل الإنتاجي.
+```powershell
+docker compose up -d postgres
+$env:ConnectionStrings__DefaultConnection='Host=localhost;Database=hospital;Username=hospital_app;Password=change-this-local-password'
+$env:SeedAdmin__Email='admin@hospital.local'
+$env:SeedAdmin__Password='Change-Me-Strong!123'
+dotnet run
+```
 
-## النطاق الأول
+افتح عنوان HTTP الذي يظهره .NET. غيّر كلمات المرور قبل أي تشغيل فعلي.
 
-- الأقسام الديناميكية وإدارة حالتها
-- المستخدمون والأدوار
-- صلاحية المدير لإضافة الأقسام والموظفين
-- العقود والأجور (المرحلة التالية)
-- تصميم عربي RTL وتجهيز لواجهة محلية آمنة
+## الإتاحة الداخلية
 
-## الأمان
+شغّل فقط على شبكة المستشفى الموثوقة، واستخدم reverse proxy أو Kestrel مع شهادات HTTPS داخلية. النسخة الحالية لا تغطي جاهزية امتثال كامل ولا تعويضًا إلكترونيًا أو سير عمل سريري آمنًا.
 
-- استخدم HTTPS أو بوابة عكسية مشفرة داخل الشبكة
-- لا تضع كلمات المرور في المستودع
-- فعّل النسخ الاحتياطي المشفر لقاعدة PostgreSQL
-- راجع الصلاحيات والسجلات بانتظام
+## البيانات الحية
+
+لا تستخدم السجلات أو أسماء المرضى الحقيقية حتى يكتمل تشفير التخزين، النسخ الاحتياطي، التفويض حسب القسم، وسجل التدقيق الكامل.

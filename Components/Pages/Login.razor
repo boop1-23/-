@@ -3,12 +3,13 @@
 
 <h1>تسجيل الدخول</h1>
 
-@if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(Navigation.Uri).TryGetValue("error", out var error))
+@if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(Navigation.Uri).TryGetValue("error", out _))
 {
     <p class="status">اسم المستخدم أو كلمة المرور غير صحيحة، أو الحساب مقفل مؤقتاً.</p>
 }
 
 <form method="post" action="/Account/Login">
+    <AntiforgeryToken />
     <label>البريد الإلكتروني
         <input name="email" type="email" autocomplete="username" required />
     </label>
